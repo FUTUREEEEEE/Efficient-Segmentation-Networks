@@ -189,7 +189,7 @@ class ProbOhemCrossEntropy2d(nn.Module):
             print('Labels: {}'.format(num_valid))
             pass
         elif num_valid > 0:
-            prob = prob.masked_fill_(1 - valid_mask, 1)     #
+            prob = prob.masked_fill_(~valid_mask, 1)     #
             mask_prob = prob[
                 target, torch.arange(len(target), dtype=torch.long)]
             threshold = self.thresh
@@ -203,7 +203,7 @@ class ProbOhemCrossEntropy2d(nn.Module):
                 valid_mask = valid_mask * kept_mask
                 print('Valid Mask: {}'.format(valid_mask.sum()))
 
-        target = target.masked_fill_(1 - valid_mask, self.ignore_label)
+        target = target.masked_fill_(~valid_mask, self.ignore_label)
         target = target.view(b, h, w)
 
         return self.criterion(pred, target)
