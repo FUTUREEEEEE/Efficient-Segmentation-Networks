@@ -178,14 +178,14 @@ def train_model(args):
     cudnn.benchmark = True
     # cudnn.deterministic = True ## my add
 
-    logFileLoc = args.savedir + args.logFile
-    if os.path.isfile(logFileLoc):
-        logger = open(logFileLoc, 'a')
-    else:
-        logger = open(logFileLoc, 'w')
-        logger.write("Parameters: %s Seed: %s" % (str(total_paramters), GLOBAL_SEED))
-        logger.write("\n%s\t\t%s\t%s\t%s" % ('Epoch', 'Loss(Tr)', 'mIOU (val)', 'lr'))
-    logger.flush()
+    # logFileLoc = args.savedir + args.logFile
+    # if os.path.isfile(logFileLoc):
+    #     logger = open(logFileLoc, 'a')
+    # else:
+    #     logger = open(logFileLoc, 'w')
+    #     logger.write("Parameters: %s Seed: %s" % (str(total_paramters), GLOBAL_SEED))
+    #     logger.write("\n%s\t\t%s\t%s\t%s" % ('Epoch', 'Loss(Tr)', 'mIOU (val)', 'lr'))
+    # logger.flush()
 
 
     # define optimization strategy
