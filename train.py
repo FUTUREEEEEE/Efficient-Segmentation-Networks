@@ -236,46 +236,46 @@ def train_model(args):
             print("Epoch : " + str(epoch) + ' Details')
             print("Epoch No.: %d\tTrain Loss = %.4f\t lr= %.6f\n" % (epoch, lossTr, lr))
 
-        # save the model
-        model_file_name = args.savedir + '/model_' + str(epoch + 1) + '.pth'
-        state = {"epoch": epoch + 1, "model": model.state_dict()}
+        # # save the model
+        # model_file_name = args.savedir + '/model_' + str(epoch + 1) + '.pth'
+        # state = {"epoch": epoch + 1, "model": model.state_dict()}
 
-        # Individual Setting for save model !!!
-        if args.dataset == 'camvid':
-            torch.save(state, model_file_name)
-        elif args.dataset == 'cityscapes':
-            if epoch >= args.max_epochs - 10:
-                torch.save(state, model_file_name)
-            elif not epoch % 50:
-                torch.save(state, model_file_name)
+        # # Individual Setting for save model !!!
+        # if args.dataset == 'camvid':
+        #     torch.save(state, model_file_name)
+        # elif args.dataset == 'cityscapes':
+        #     if epoch >= args.max_epochs - 10:
+        #         torch.save(state, model_file_name)
+        #     elif not epoch % 50:
+        #         torch.save(state, model_file_name)
 
 
 
-        # draw plots for visualization
-        if epoch % 50 == 0 or epoch == (args.max_epochs - 1):
-            # Plot the figures per 50 epochs
-            fig1, ax1 = plt.subplots(figsize=(11, 8))
+        # # draw plots for visualization
+        # if epoch % 50 == 0 or epoch == (args.max_epochs - 1):
+        #     # Plot the figures per 50 epochs
+        #     fig1, ax1 = plt.subplots(figsize=(11, 8))
 
-            ax1.plot(range(start_epoch, epoch + 1), lossTr_list)
-            ax1.set_title("Average training loss vs epochs")
-            ax1.set_xlabel("Epochs")
-            ax1.set_ylabel("Current loss")
+        #     ax1.plot(range(start_epoch, epoch + 1), lossTr_list)
+        #     ax1.set_title("Average training loss vs epochs")
+        #     ax1.set_xlabel("Epochs")
+        #     ax1.set_ylabel("Current loss")
 
-            plt.savefig(args.savedir + "loss_vs_epochs.png")
+        #     plt.savefig(args.savedir + "loss_vs_epochs.png")
 
-            plt.clf()
+        #     plt.clf()
 
-            fig2, ax2 = plt.subplots(figsize=(11, 8))
+        #     fig2, ax2 = plt.subplots(figsize=(11, 8))
 
-            ax2.plot(epoches, mIOU_val_list, label="Val IoU")
-            ax2.set_title("Average IoU vs epochs")
-            ax2.set_xlabel("Epochs")
-            ax2.set_ylabel("Current IoU")
-            plt.legend(loc='lower right')
+        #     ax2.plot(epoches, mIOU_val_list, label="Val IoU")
+        #     ax2.set_title("Average IoU vs epochs")
+        #     ax2.set_xlabel("Epochs")
+        #     ax2.set_ylabel("Current IoU")
+        #     plt.legend(loc='lower right')
 
-            plt.savefig(args.savedir + "iou_vs_epochs.png")
+        #     plt.savefig(args.savedir + "iou_vs_epochs.png")
 
-            plt.close('all')
+        #     plt.close('all')
 
     logger.close()
 
