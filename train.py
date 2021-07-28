@@ -32,6 +32,46 @@ print(torch_ver)
 GLOBAL_SEED = 1234
 
 
+import os 
+import time
+import torch
+from S2R import DSAModules
+import numpy as np
+from S2R.utils import *
+import torch.nn as nn
+from S2R.models import modules
+import torchvision.utils as vutils
+import torch.backends.cudnn as cudnn
+from PIL import Image
+import torchvision
+import matplotlib.pyplot as plt
+from matplotlib.image import imsave
+
+#####
+#load Shared_Struct_Encoder
+Shared_Struct_Encoder = modules.Struct_Encoder(n_downsample=2, n_res=4, 
+											input_dim=3, dim=64, 
+											norm='in', activ='lrelu', 
+											pad_type='reflect')
+Shared_Struct_Encoder = Shared_Struct_Encoder.cuda()	
+Shared_Struct_Encoder.load_state_dict(torch.load("/content/drive/MyDrive/S2Rnet/struct_encoder_vkitti.pth"))
+#for name,p in Shared_Struct_Encoder.named_parameters():
+#  print(name,p)
+Shared_Struct_Encoder.eval()
+
+#load decoder
+Struct_Decoder = modules.Struct_Decoder()
+Struct_Decoder = torch.nn.DataParallel(Struct_Decoder).cuda()
+Struct_Decoder.load_state_dict(torch.load("/content/drive/MyDrive/S2Rnet/struct_decoder_vkitti.pth"))
+Struct_Decoder.eval()
+
+#load attention module
+Attention_Model = DSAModules.drn_d_22(pretrained=True)
+DSAModle = DSAModules.AutoED(Attention_Model)
+DSAModle = torch.nn.DataParallel(DSAModle).cuda()
+DSAModle.load_state_dict(torch.load("/content/drive/MyDrive/S2Rnet/dsamodels_vkitti.pth"))
+DSAModle.eval()
+
 
 def parse_args():
     parser = ArgumentParser(description='Efficient semantic segmentation')
@@ -324,7 +364,32 @@ def train(args, train_loader, model, criterion, optimizer, epoch):
         else:
             images = images.cuda()
             labels = labels.long().cuda()
+        
+        #print("images max",torch.max(images))
+        #print("images min",torch.min(images))
 
+        with torch.no_grad():
+
+          struct_code = Shared_Struct_Encoder(images)
+          struct_code = Struct_Decoder(struct_code)
+
+          attention_map = DSAModle(images)
+          attention_map = attention_map * struct_code
+          
+          
+          attention_map_min = torch.min(attention_map)
+          attention_map_max = torch.max(attention_map)
+          attention_map = (attention_map - attention_map_min) / (attention_map_max - attention_map_min)
+          attention_map*=255
+          attention_map=attention_map-torch.mean(attention_map)
+
+          #print("attention_map max",torch.max(attention_map))
+          #print("attention_map min",torch.min(attention_map))
+
+          images=torch.cat((images,attention_map),1)
+          
+          del struct_code,attention_map
+        
         output = model(images)
         loss = criterion(output, labels)
         optimizer.zero_grad()
